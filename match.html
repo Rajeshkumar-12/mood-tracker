@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🃏 Memory Match</title>
+<style>
+body { font-family: Arial; background: #a2d5f2; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 10px; overflow: hidden; }
+h2 { margin-top: 10px; }
+#info { background: white; width: 90%; max-width: 500px; padding: 12px; border-radius: 10px; margin-bottom: 10px; font-weight: bold; display: flex; flex-direction: column; gap: 10px; }
+#stats { display: flex; justify-content: space-between; }
+#controls { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+#levelContainer { display:flex; align-items:center; gap:5px; }
+#levelLabel { font-weight: bold; }
+#levelSelect { padding: 5px; font-size: 16px; border-radius: 6px; }
+#gameArea { display: grid; gap: 5px; width: 90%; max-width: 500px; border: 3px solid #1565c0; padding: 5px; border-radius: 8px; background: #e0bbf0; }
+.card { perspective: 600px; }
+.card-inner { width: 100%; height: 60px; background: #ffeaa7; display: flex; justify-content: center; align-items: center; border-radius: 8px; font-size: 1.6em; cursor: pointer; user-select: none; transition: transform 0.6s; transform-style: preserve-3d; position: relative; }
+.card.flipped .card-inner { transform: rotateY(180deg); }
+.card.matched .card-inner { background: #7bed9f !important; color: #000; }
+.card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display:flex; justify-content:center; align-items:center; border-radius: 8px; }
+.card-back { transform: rotateY(180deg); }
+button { margin-top: 10px; padding: 8px 16px; font-size: 16px; border-radius: 8px; border: none; background: #1565c0; color: white; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h2>🃏 Memory Match</h2>
+
+<div id="info">
+  <div id="stats">
+    <div>📈 High Score: <span id="highScore">0</span> sec</div>
+    <div>❤️ Chances Left: <span id="misses">0</span></div>
+  </div>
+  <div id="controls">
+    <div id="pairedInfo">Paired: <span id="paired">0</span></div>
+    <div id="levelContainer">
+      <span id="levelLabel">Level:</span>
+      <select id="levelSelect">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+  </div>
+  <div>Time: <span id="time">0.00</span> sec</div>
+</div>
+
+<div id="gameArea"></div>
+<button id="startBtn">▶️ Start</button>
+<button id="resetBtn">🔄 Reset</button>
+
+<audio id="flipSound" src="flip.mp3"></audio>
+<audio id="correctSound" src="correct.mp3"></audio>
+<audio id="wrongSound" src="wrong.mp3"></audio>
+<audio id="gameOverSound" src="Gameover.mp3"></audio>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBGLsOfLuB4qrKdjHZ5XhQ0svEBOjhuYr4",
+  authDomain: "mental-d59ad.firebaseapp.com",
+  databaseURL: "https://mental-d59ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mental-d59ad",
+  storageBucket: "mental-d59ad.appspot.com",
+  messagingSenderId: "1028228267123",
+  appId: "1:1028228267123:web:29163424031bf3d646be06"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Current user
+let currentUser = localStorage.getItem("currentUser");
+if(!currentUser) { alert("No user found!"); window.location.href="Login.html"; }
+
+let level = 'easy';
+const highScoreEl = document.getElementById("highScore");
+const gameArea = document.getElementById("gameArea");
+const levelSelect = document.getElementById("levelSelect");
+const pairedEl = document.getElementById("paired");
+const timeEl = document.getElementById("time");
+const missesEl = document.getElementById("misses");
+const startBtn = document.getElementById("startBtn");
+const resetBtn = document.getElementById("resetBtn");
+const flipSound = document.getElementById("flipSound");
+const correctSound = document.getElementById("correctSound");
+const wrongSound = document.getElementById("wrongSound");
+const gameOverSound = document.getElementById("gameOverSound");
+
+let totalCards=6, maxMiss=10, paired=0, misses=0, first=null, second=null, lock=false;
+let startTime=0, timerInterval=null;
+const fruits = ["🍎","🍌","🍇","🍓","🍍","🥝","🍑","🍒","🍉","🍋","🥭","🍐"];
+
+// ✅ Load highscore from Game/Match/<username>/highscore
+function loadHighScore(){
+  const userRef = ref(db, `Game/Match/${currentUser}`);
+  get(userRef).then(snapshot=>{
+    highScoreEl.textContent = snapshot.exists() ? snapshot.val().highscore || 0 : 0;
+  });
+}
+
+// ✅ Save highscore to Game/Match/<username>/highscore
+function saveHighScore(){
+  const currentTime = parseFloat(timeEl.textContent);
+  const userRef = ref(db, `Game/Match/${currentUser}`);
+  get(userRef).then(snapshot=>{
+    if(!snapshot.exists() || currentTime < (snapshot.val().highscore || Infinity)){
+      set(userRef, { highscore: currentTime });
+      loadHighScore();
+    }
+  });
+}
+
+function setLevel(l){
+  level = l;
+  if(l==="easy"){ totalCards=6; maxMiss=10; gameArea.style.gridTemplateColumns="repeat(3,1fr)"; }
+  else if(l==="medium"){ totalCards=16; maxMiss=15; gameArea.style.gridTemplateColumns="repeat(4,1fr)"; }
+  else { totalCards=24; maxMiss=20; gameArea.style.gridTemplateColumns="repeat(4,1fr)"; }
+  loadHighScore();
+}
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function createBoard(){
+  setLevel(levelSelect.value);
+  const needed = totalCards/2;
+  const pick = shuffle([...fruits]).slice(0,needed);
+  const cards = shuffle([...pick,...pick]);
+
+  gameArea.innerHTML = "";
+  paired=0; pairedEl.textContent=paired;
+  misses=0; missesEl.textContent=maxMiss;
+  first=null; second=null; lock=false;
+  stopTimer(); timeEl.textContent="0.00";
+
+  cards.forEach(v=>{
+    const c=document.createElement("div");
+    c.classList.add("card");
+    c.dataset.val=v;
+
+    const inner=document.createElement("div"); inner.classList.add("card-inner");
+    const front=document.createElement("div"); front.classList.add("card-front");
+    const back=document.createElement("div"); back.classList.add("card-back"); back.textContent=v;
+    inner.appendChild(front); inner.appendChild(back);
+    c.appendChild(inner);
+
+    c.onclick=()=>flipCard(c);
+    gameArea.appendChild(c);
+  });
+}
+
+function flipCard(card){
+  if(lock || card.classList.contains("flipped") || card.classList.contains("matched")) return;
+  flipSound.play();
+  card.classList.add("flipped");
+  if(!first){ first=card; } 
+  else { second=card; lock=true; setTimeout(checkPair,600); }
+}
+
+function checkPair(){
+  if(first.dataset.val===second.dataset.val){
+    paired++; pairedEl.textContent = paired;
+    first.classList.add("matched"); 
+    second.classList.add("matched");
+    correctSound.play();
+    first=null; second=null; lock=false;
+
+    if(paired===totalCards/2){
+      stopTimer();
+      alert(`🎉 Congratulations! You completed ${level} level in ${timeEl.textContent} sec!`);
+      saveHighScore();
+    }
+  } else {
+    wrongSound.play();
+    if(navigator.vibrate){ navigator.vibrate([150,80,150]); }
+    misses++; missesEl.textContent = maxMiss - misses;
+    setTimeout(()=>{
+      first.classList.remove("flipped");
+      second.classList.remove("flipped");
+      first=null; second=null; lock=false;
+      if(misses>=maxMiss) gameOver();
+    },600);
+  }
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  startTime = Date.now();
+  timerInterval = setInterval(()=>{ timeEl.textContent = ((Date.now() - startTime)/1000).toFixed(2); },50);
+}
+function stopTimer(){ clearInterval(timerInterval); }
+
+function startGame(){ createBoard(); startTimer(); }
+function resetGame(){ stopTimer(); createBoard(); }
+function gameOver(){ gameOverSound.play(); stopTimer(); alert("Game Over!"); }
+
+startBtn.onclick = startGame;
+resetBtn.onclick = resetGame;
+levelSelect.onchange = createBoard;
+
+// ✅ Always load latest user highscore
+createBoard();
+</script>
+</body>
+</html>

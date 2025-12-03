@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧠 Mood Tracking App</title>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    border: 8px solid #001f5b;
+  }
+
+  #mainContent {
+    width: 100%;
+    max-width: 420px;
+    padding: 10px;
+    height: calc(100% - 20px);
+    overflow-y: auto;
+  }
+
+  .board {
+    width: 99%;
+    border: 3px solid black;
+    padding: 15px;
+    box-sizing: border-box;
+    margin: 10px auto;
+    background-color: #D8BFFD;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .line { margin: 5px 0; display: flex; align-items: center; }
+
+  .settings-btn {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background: #90ee90;
+    color: black;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .app-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .welcome {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 15px 0;
+    color: #333;
+  }
+
+  .mood-options {
+    display: flex;
+    justify-content: space-around;
+    margin: 10px 0;
+    flex-wrap: wrap;
+  }
+
+  .mood {
+    font-size: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+  }
+
+  .mood:hover { transform: scale(1.2); }
+
+  textarea {
+    width: 100%;
+    height: 80px;
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #000;
+    background-color: #d9f1ff;
+  }
+
+  #buttonsContainer {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  #buttonsContainer button {
+    flex: 1;
+    min-width: 60px;
+    padding: 8px;
+    border-radius: 8px;
+    color: white;
+    border: 1px solid #000;
+    cursor: pointer;
+  }
+
+  #saveBtn { background: #4a90e2; }
+  #viewDataBtn { background: #16a085; }
+  #clearBtn { background: #e74c3c; font-size: 12px; padding: 5px; }
+
+  #aiResponse {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #d9f1ff;
+    text-align: left;
+    white-space: pre-line;
+  }
+
+  #entries {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+  }
+
+  #entries li {
+    background: #f0f8ff;
+    margin: 6px 0;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="mainContent" style="display:none">
+
+  <div class="board">
+    <div class="line">
+      <button id="settingsBtn" class="settings-btn" title="Settings">⚙️</button>
+    </div>
+    <div class="line app-title">🧠 Mood Tracking App</div>
+  </div>
+
+  <div class="welcome" id="welcome">Welcome user</div>
+
+  <div class="mood-section">
+    <h3>-> How are you feeling today?</h3>
+    <div class="mood-options">
+      <button class="mood" data-value="Happy">😀</button>
+      <button class="mood" data-value="Good">🙂</button>
+      <button class="mood" data-value="Neutral">😐</button>
+      <button class="mood" data-value="Sad">😟</button>
+      <button class="mood" data-value="VerySad">😢</button>
+      <button class="mood" data-value="Angry">😡</button>
+    </div>
+  </div>
+
+  <textarea id="note" placeholder="Write about your day..."></textarea>
+
+  <div id="buttonsContainer">
+    <button id="saveBtn">Save Mood</button>
+    <button id="viewDataBtn">📊 View Your Data</button>
+    <button id="clearBtn">Clear</button>
+  </div>
+
+  <div id="aiResponse"></div>
+
+  <h3>📅 Your Recent Entries</h3>
+  <ul id="entries"></ul>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getDatabase, ref, get, push, update, onValue } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBGLsOfLuB4qrKdjHZ5XhQ0svEBOjhuYr4",
+  authDomain: "mental-d59ad.firebaseapp.com",
+  databaseURL: "https://mental-d59ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mental-d59ad",
+  storageBucket: "mental-d59ad.appspot.com",
+  messagingSenderId: "1028228267123",
+  appId: "1:1028228267123:web:29163424031bf3d646be06"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const mainContent = document.getElementById('mainContent');
+const saveBtn = document.getElementById('saveBtn');
+const viewDataBtn = document.getElementById('viewDataBtn');
+const clearBtn = document.getElementById('clearBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const moods = document.querySelectorAll('.mood');
+const note = document.getElementById('note');
+const entries = document.getElementById('entries');
+const aiResponse = document.getElementById('aiResponse');
+const welcome = document.getElementById('welcome');
+
+let selectedMood = null;
+const currentUser = localStorage.getItem('currentUser');
+
+if (!currentUser) { window.location.href = "Login.html"; }
+else {
+  const userRef = ref(db, `users/${currentUser}`);
+  get(userRef).then(snapshot => {
+    welcome.textContent = snapshot.exists() ? 
+      `✨ Welcome ${snapshot.val().name || currentUser} ✨` : `Welcome ${currentUser}`;
+    mainContent.style.display = 'block';
+  });
+}
+
+settingsBtn.addEventListener('click', () => { window.location.href = "settings.html"; });
+viewDataBtn.addEventListener('click', () => { window.location.href = "analytics.html"; });
+clearBtn.addEventListener('click', () => { note.value = ''; aiResponse.textContent = ''; moods.forEach(b => b.style.opacity='1'); selectedMood=null; });
+
+moods.forEach(btn => { 
+  btn.addEventListener('click', () => { 
+    selectedMood = btn.dataset.value; 
+    moods.forEach(b => b.style.opacity='0.5'); 
+    btn.style.opacity='1'; 
+  }); 
+});
+
+const messages = {
+  Happy: `😄 Keep shining 😄, your smile lights up the world 🌍!
+✨ Every small step 👣 you take today is a victory 🏆.
+🎉 Celebrate your wins, no matter how tiny 🌟.
+💖 Spread kindness, it boomerangs back as joy 😇.
+🌈 Let your happiness color the lives of others 👫.
+🚀 Dream big, you have the power 💪 to achieve it!
+☀️ Stay positive, even clouds ☁️ have silver linings 🌟.`,
+
+  Good: `🙂 You’re doing great, keep the momentum going! 🌟
+💪 Every effort you make counts, no matter how small 👣.
+✨ Positivity attracts more positivity ☀️.
+🎯 Focus on your goals, and take one step at a time 🏃‍♂️.
+🌸 Be kind to yourself and others 💖.
+🎉 Celebrate even tiny achievements 🏆.
+🌈 Keep your heart light and your mind strong 💭.`,
+
+  Neutral: `😐 It’s okay to have a calm day 🌿.
+💤 Rest and recharge your mind and body 🛌.
+🌱 Small steps today prepare you for growth 🌻.
+🧘‍♂️ Take a moment to breathe and reflect 🌬️.
+☕ Enjoy the little things that bring peace 🍵.
+📖 Learn something new, even if slowly 📚.
+🌤️ Balance is key, don’t rush anything ⏳.`,
+
+  Sad: `😟 Feeling sad is normal, don’t fight your emotions 💔.
+🌧️ Rainy days teach us to appreciate the sun ☀️.
+📝 Write down your feelings, it lightens the heart 🖊️.
+💖 Talk to someone you trust, you’re not alone 👫.
+🌱 Small self-care steps help you heal 🌸.
+🎵 Listen to music that lifts your spirit 🎶.
+🌈 Remember, sadness is temporary, better days come 🌤️.`,
+
+  VerySad: `😢 It’s okay to feel down, let yourself process 💧.
+🧘 Breathe deeply and focus on the present 🌬️.
+💖 Reach out for support, you’re never alone 🫂.
+🌱 Small acts of care can help heal the heart 🌸.
+📝 Write or draw your feelings, release them creatively 🎨.
+☀️ Look for tiny joys, even a smile counts 🌈.
+🎵 Music or nature can calm your mind 🌿.`,
+
+  Angry: `😡 Take a deep breath and pause 🫁.
+💪 Channel your energy into something positive ⚡.
+🧘 Focus on calming your mind and body 🌬️.
+💬 Express feelings respectfully, don’t bottle them up 🗣️.
+🌱 Step away from the trigger if needed 🚶‍♂️.
+🎯 Redirect your focus to solutions, not problems 🛠️.
+☀️ Anger is temporary, let it flow and fade 🌤️.`
+};
+
+const moodEmojis = { Happy:"😀", Good:"🙂", Neutral:"😐", Sad:"😟", VerySad:"😢", Angry:"😡" };
+const userEntriesRef = ref(db, `users/${currentUser}/entries`);
+
+saveBtn.addEventListener('click', async () => {
+  if (!selectedMood) { alert('Please select a mood!'); return; }
+  const today = new Date();
+  const todayStr = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
+
+  const snapshot = await get(userEntriesRef);
+  let existingKey = null;
+  if (snapshot.exists()) {
+    const data = snapshot.val();
+    for (const key in data) { if (data[key].date === todayStr) { existingKey = key; break; } }
+  }
+
+  const entry = { date: todayStr, mood: selectedMood, note: note.value || '(no note)' };
+
+  if (existingKey) { 
+    await update(ref(db, `users/${currentUser}/entries/${existingKey}`), entry); 
+    alert("Mood updated for today!"); 
+  } else { 
+    await push(userEntriesRef, entry); 
+    alert("Mood saved successfully!"); 
+  }
+
+  aiResponse.textContent = "🤖 Thinking...";
+
+  try {
+    const res = await fetch('http://127.0.0.1:3000/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: note.value || `${selectedMood} mood` })
+    });
+    const data = await res.json();
+    aiResponse.textContent = data.reply || `${moodEmojis[selectedMood]} ${messages[selectedMood]}`;
+  } catch (err) {
+    console.error(err);
+    aiResponse.textContent = `${moodEmojis[selectedMood]} ${messages[selectedMood]} \n❌ AI server not reachable.`;
+  }
+
+  note.value = '';
+  selectedMood = null;
+  moods.forEach(b => b.style.opacity = '1');
+});
+
+onValue(userEntriesRef, snapshot => {
+  entries.innerHTML = '';
+  const data = snapshot.val();
+  if (data) {
+    const sortedEntries = Object.values(data)
+      .sort((a,b)=>{
+        const [d1,m1,y1]=a.date.split('/').map(Number);
+        const [d2,m2,y2]=b.date.split('/').map(Number);
+        return new Date(y2,m2-1,d2) - new Date(y1,m1-1,d1);
+      })
+      .slice(0,3);
+    sortedEntries.forEach(e => {
+      const li = document.createElement('li');
+      li.textContent = `${e.date} → ${moodEmojis[e.mood]} ${e.mood} | ${e.note}`;
+      entries.appendChild(li);
+    });
+  }
+});
+</script>
+
+</body>
+</html>

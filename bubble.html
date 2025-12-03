@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎈 Bubble Pop</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin:0;
+  height:100vh;
+  background:#b2ebf2;
+  overflow:hidden;
+}
+
+h2{
+  margin-top:10px;
+}
+
+#gameHeader{
+  width:90%;
+  display:flex;
+  justify-content:space-between;
+  padding:0 10px;
+  font-size:18px;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+#scoreBoard{
+  margin-top:5px;
+  font-size:18px;
+  font-weight:bold;
+}
+
+#gameArea{
+  position:relative;
+  width:90%;
+  height:65%;
+  border:2px solid #333;
+  background-color: #fff; /* white background inside border */
+  overflow:hidden;
+  margin-top:10px;
+}
+
+/* Overlay background image with transparency */
+#gameArea::before {
+  content: "";
+  position: absolute;
+  top:0; left:0; right:0; bottom:0;
+  background: url('Bubble.jpg') center/contain no-repeat;
+  opacity: 0.2; /* very transparent */
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bubble{
+  position:absolute;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:20px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index: 1; /* ensure bubbles are above background */
+}
+
+#resetBtn{
+  margin-top:10px;
+  padding:8px 16px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  background:#ff5722;
+  color:white;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<h2>🎈 Bubble Pop</h2>
+<div id="gameHeader">
+  <div>📈 High Score: <span id="highScore">0</span></div>
+  <div id="livesLabel">Lives: ❤️❤️❤️</div>
+</div>
+<div id="scoreBoard">Score: 0</div>
+<div id="gameArea"></div>
+<button id="resetBtn">🔄 Reset Game</button>
+
+<audio id="popSound" src="pop.mp3" preload="auto"></audio>
+<audio id="gameOverSound" src="Gameover.mp3" preload="auto"></audio>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBGLsOfLuB4qrKdjHZ5XhQ0svEBOjhuYr4",
+  authDomain: "mental-d59ad.firebaseapp.com",
+  databaseURL: "https://mental-d59ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mental-d59ad",
+  storageBucket: "mental-d59ad.appspot.com",
+  messagingSenderId: "1028228267123",
+  appId: "1:1028228267123:web:29163424031bf3d646be06"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// Current user
+let currentUser = localStorage.getItem("currentUser") || "guest";
+const userRef = ref(db, "Game/Bubble/" + currentUser);
+
+// Load highscore
+let highScore = 0;
+get(userRef).then(snapshot=>{
+  if(snapshot.exists()){
+    highScore = snapshot.val().highscore || 0;
+    document.getElementById("highScore").textContent = highScore;
+  }
+});
+
+// DOM
+const gameArea = document.getElementById("gameArea");
+const scoreBoard = document.getElementById("scoreBoard");
+const livesLabel = document.getElementById("livesLabel");
+const highScoreEl = document.getElementById("highScore");
+const resetBtn = document.getElementById("resetBtn");
+const popSound = document.getElementById("popSound");
+const gameOverSound = document.getElementById("gameOverSound");
+
+let score = 0;
+let lives = 3;
+let bubbleCount = 0;
+let intervalSpeed = 2000;
+let gameInterval;
+
+function createBubble() {
+  const bubble = document.createElement("div");
+  const size = Math.random() * 40 + 30;
+  const isBomb = Math.random() < 0.15; 
+  bubble.classList.add("bubble");
+  bubble.style.width = size + "px";
+  bubble.style.height = size + "px";
+  bubble.style.left = Math.random() * (gameArea.clientWidth - size) + "px";
+  bubble.style.top = -size + "px";
+  bubble.textContent = isBomb ? "💣" : "";
+  bubble.style.backgroundColor = isBomb ? "#ff0000" : `hsl(${Math.random()*360},70%,60%)`;
+  gameArea.appendChild(bubble);
+
+  bubble.addEventListener("click", ()=>{
+    if(isBomb){
+      lives--;
+      updateLives();
+      if(lives<=0) endGame();
+    } else {
+      score++;
+      updateScore();
+    }
+    bubble.remove();
+    popSound.currentTime = 0;
+    popSound.play();
+  });
+
+  let speed = 3;
+  const moveBubble = setInterval(()=>{
+    if(!bubble.parentElement){ clearInterval(moveBubble); return; }
+    let top = parseFloat(bubble.style.top);
+    top += speed;
+    if(top + size >= gameArea.clientHeight){
+      clearInterval(moveBubble);
+      bubble.remove();
+      if(!isBomb){ lives--; updateLives(); if(lives<=0) endGame(); }
+      return;
+    }
+    bubble.style.top = top + "px";
+  }, 20);
+
+  bubbleCount++;
+  if(bubbleCount % 5 === 0 && intervalSpeed>400){
+    intervalSpeed -= 100;
+    clearInterval(gameInterval);
+    gameInterval = setInterval(createBubble, intervalSpeed);
+  }
+}
+
+function updateScore(){ scoreBoard.textContent = "Score: " + score; }
+function updateLives(){ livesLabel.textContent = "Lives: " + "❤️".repeat(lives); }
+
+async function endGame(){
+  clearInterval(gameInterval);
+  gameOverSound.currentTime = 0;
+  gameOverSound.play();
+  alert(`🎮 Game Over! Your score: ${score}`);
+  if(score > highScore){
+    highScore = score;
+    highScoreEl.textContent = highScore;
+    await set(userRef, { highscore: highScore });
+  }
+  setTimeout(startGame, 1000);
+}
+
+function startGame(){
+  score=0; lives=3; bubbleCount=0; intervalSpeed=2000;
+  updateScore();
+  updateLives();
+  gameArea.innerHTML="";
+  gameInterval = setInterval(createBubble, intervalSpeed);
+}
+
+resetBtn.addEventListener("click", startGame);
+startGame();
+</script>
+</body>
+</html>

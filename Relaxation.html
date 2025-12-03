@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧘 Relaxation</title>
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial;
+    text-align: center;
+    background: linear-gradient(135deg, #a8edea, #fed6e3);
+    background-size: 400% 400%;
+    animation: gradientShift 20s ease infinite;
+  }
+  @keyframes gradientShift {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+  }
+  h2 { margin-top: 20px; color: #333; }
+  #controlBoard {
+    border: 2px solid #00aaff;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    background: rgba(255,255,255,0.8);
+    align-items: center;
+  }
+  label {
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+  }
+  input {
+    width: 70px;
+    padding: 5px;
+    font-size: 16px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    text-align: center;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background: #00aaff;
+    color: white;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  #circleContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    flex: 1;
+  }
+  #circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    transition: width 1s ease-in-out, height 1s ease-in-out;
+    background: linear-gradient(45deg, #a3d5ff, #ffe3f2, #c7ffd8);
+    box-shadow: 0 0 25px rgba(0,0,0,0.2);
+  }
+  #status {
+    margin-top: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+    transition: color 1s ease;
+  }
+  #musicControl {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 30px;
+    cursor: pointer;
+    user-select: none;
+    border: 2px solid #00aaff;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    line-height: 1;
+    width: auto;
+    height: auto;
+    min-width: 50px;
+    min-height: 50px;
+    text-align: center;
+    position: fixed;
+  }
+  #musicControl.cross::after {
+    content: '❌';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 20px;
+    color: red;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<h2>🧘 Relaxation</h2>
+
+<div id="controlBoard">
+  <label>Inhale (seconds)
+    <input type="number" id="inhaleTime" value="4" min="1">
+  </label>
+  <label>Hold (seconds)
+    <input type="number" id="holdTime" value="4" min="0">
+  </label>
+  <label>Exhale (seconds)
+    <input type="number" id="exhaleTime" value="6" min="1">
+  </label>
+  <label>Cycles
+    <input type="number" id="cycles" value="5" min="1">
+  </label>
+  <button id="startBtn">Start Breathing</button>
+  <button id="stopBtn">Stop</button>
+</div>
+
+<div id="circleContainer">
+  <div id="circle">🫁</div>
+</div>
+
+<div id="status">Ready</div>
+
+<div id="musicControl" title="Double-click to toggle music">🎵</div>
+<audio id="bgMusic" src="nature.mp3" loop></audio>
+
+<script>
+const inhaleInput = document.getElementById("inhaleTime");
+const holdInput = document.getElementById("holdTime");
+const exhaleInput = document.getElementById("exhaleTime");
+const cyclesInput = document.getElementById("cycles");
+const startBtn = document.getElementById("startBtn");
+const stopBtn = document.getElementById("stopBtn");
+const circle = document.getElementById("circle");
+const status = document.getElementById("status");
+
+const musicControl = document.getElementById("musicControl");
+const bgMusic = document.getElementById("bgMusic");
+
+let interval;
+let colorAnimation;
+let currentCycle = 0;
+let totalCycles = 0;
+let phaseTimes = [];
+let phaseNames = ["Inhale", "Hold", "Exhale"];
+let phaseIndex = 0;
+let running = false;
+let musicPlaying = false;
+
+// Soft gradient animation
+let hue = 0;
+function animateColors() {
+  if(!running) return;
+  hue = (hue + 0.5) % 360;
+  circle.style.background = `linear-gradient(${hue}deg, #a3d5ff, #ffe3f2, #c7ffd8)`;
+  colorAnimation = requestAnimationFrame(animateColors);
+}
+
+function startBreathing() {
+  clearInterval(interval);
+  cancelAnimationFrame(colorAnimation);
+  running = true;
+  animateColors();
+
+  const inhale = parseInt(inhaleInput.value);
+  const hold = parseInt(holdInput.value);
+  const exhale = parseInt(exhaleInput.value);
+  totalCycles = parseInt(cyclesInput.value);
+
+  if(inhale <=0 || exhale <=0 || totalCycles <=0) {
+    alert("Please enter valid times and cycles.");
+    return;
+  }
+
+  phaseTimes = [inhale, hold, exhale];
+  phaseIndex = 0;
+  currentCycle = 1;
+  status.textContent = `Cycle ${currentCycle}/${totalCycles} - ${phaseNames[phaseIndex]}`;
+  animatePhase();
+}
+
+function animatePhase() {
+  if(!running) return;
+
+  const time = phaseTimes[phaseIndex];
+  let elapsed = 0;
+
+  let endSize;
+  if(phaseIndex === 0) endSize = 250; // Inhale
+  else if(phaseIndex === 1) endSize = 250; // Hold
+  else endSize = 150; // Exhale
+
+  circle.style.transition = `width ${time}s ease-in-out, height ${time}s ease-in-out`;
+  circle.style.width = endSize + "px";
+  circle.style.height = endSize + "px";
+
+  interval = setInterval(()=>{
+    elapsed++;
+    if(elapsed >= time) {
+      clearInterval(interval);
+      phaseIndex++;
+      if(phaseIndex > 2) {
+        phaseIndex = 0;
+        currentCycle++;
+        if(currentCycle > totalCycles) {
+          status.textContent = "✅ Breathing Complete!";
+          running = false;
+          cancelAnimationFrame(colorAnimation);
+          circle.style.width = "150px";
+          circle.style.height = "150px";
+          bgMusic.pause();
+          musicPlaying = false;
+          musicControl.classList.add("cross");
+          return;
+        }
+      }
+      status.textContent = `Cycle ${currentCycle}/${totalCycles} - ${phaseNames[phaseIndex]}`;
+      animatePhase();
+    }
+  },1000);
+}
+
+startBtn.addEventListener("click", startBreathing);
+stopBtn.addEventListener("click", ()=>{
+  running = false;
+  clearInterval(interval);
+  cancelAnimationFrame(colorAnimation);
+  status.textContent = "⏸ Breathing Stopped";
+  circle.style.width = "150px";
+  circle.style.height = "150px";
+  bgMusic.pause();
+  musicPlaying = false;
+  musicControl.classList.add("cross");
+});
+
+// Music toggle
+musicControl.addEventListener("dblclick", ()=>{
+  if(musicPlaying){
+    bgMusic.pause();
+    musicPlaying = false;
+    musicControl.classList.add("cross");
+  } else {
+    bgMusic.play();
+    musicPlaying = true;
+    musicControl.classList.remove("cross");
+  }
+});
+</script>
+
+</body>
+</html>

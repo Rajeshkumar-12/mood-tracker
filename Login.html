@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Create Account</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: url('Fun.jpg') no-repeat center center fixed;
+    background-size: cover;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card {
+    width: 92%;
+    max-width: 350px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.25);
+    text-align: center;
+    backdrop-filter: blur(5px);
+    border: 3px solid #000; /* Added border */
+  }
+
+  h2 {
+    margin-top: 0;
+    color: black;
+    font-size: 24px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    width: 50%;
+    padding-bottom: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    color: black;
+    background: rgba(255,255,255,0.5);
+    border-radius: 7px;
+    transition: 0.2s;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+
+  .tab:hover { background: rgba(255,255,255,0.7); }
+
+  .active {
+    border-bottom: 2px solid black;
+  }
+
+  input {
+    width: 90%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 7px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    background: rgba(255,255,255,0.6);
+    color: black;
+  }
+
+  input::placeholder { color: #555; }
+
+  button {
+    width: 90%;
+    padding: 12px;
+    background: #4a90e2;
+    color: white;
+    border: none;
+    font-size: 16px;
+    border-radius: 7px;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: 0.2s;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+
+  button:hover { opacity: 0.9; }
+
+  #msg {
+    margin-top: 12px;
+    font-size: 15px;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+  <div class="card">
+    <h2 id="formTitle">Login</h2>
+
+    <div class="tabs">
+      <div class="tab active" id="loginTab">Login</div>
+      <div class="tab" id="signupTab">Create Account</div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+      <input type="text" id="loginUser" placeholder="Username">
+      <input type="password" id="loginPass" placeholder="Password">
+      <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signupForm" style="display:none;">
+      <input type="text" id="newUser" placeholder="Create Username">
+      <input type="password" id="newPass" placeholder="Password">
+      <input type="password" id="rePass" placeholder="Re-enter Password">
+      <button onclick="signup()">Create Account</button>
+    </div>
+
+    <p id="msg"></p>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBGLsOfLuB4qrKdjHZ5XhQ0svEBOjhuYr4",
+      authDomain: "mental-d59ad.firebaseapp.com",
+      databaseURL: "https://mental-d59ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "mental-d59ad",
+      storageBucket: "mental-d59ad.appspot.com",
+      messagingSenderId: "1028228267123",
+      appId: "1:1028228267123:web:29163424031bf3d646be06"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const msg = document.getElementById('msg');
+    const formTitle = document.getElementById('formTitle');
+
+    loginTab.onclick = () => {
+      loginTab.classList.add("active");
+      signupTab.classList.remove("active");
+      loginForm.style.display = "block";
+      signupForm.style.display = "none";
+      formTitle.textContent = "Login";
+      msg.textContent = "";
+    };
+
+    signupTab.onclick = () => {
+      signupTab.classList.add("active");
+      loginTab.classList.remove("active");
+      loginForm.style.display = "none";
+      signupForm.style.display = "block";
+      formTitle.textContent = "Create Account";
+      msg.textContent = "";
+    };
+
+    function login() {
+      const user = loginUser.value.trim();
+      const pass = loginPass.value.trim();
+      if (!user || !pass) { show("Enter username & password", "red"); return; }
+      db.ref("users/" + user).get().then(snap => {
+        if (snap.exists() && snap.val().password === pass) {
+          show("Login Successful!", "green");
+          localStorage.setItem("currentUser", user);
+          setTimeout(() => window.location.href = "index.html", 800);
+        } else { show("Wrong username or password!", "red"); }
+      });
+    }
+
+    function signup() {
+      const user = newUser.value.trim();
+      const pass = newPass.value.trim();
+      const rep = rePass.value.trim();
+      if (!user || !pass || !rep) { show("Fill all fields!", "red"); return; }
+      if (pass !== rep) { show("Passwords do not match!", "red"); return; }
+      db.ref("users/" + user).get().then(snap => {
+        if (snap.exists()) { show("Username already taken!", "red"); }
+        else {
+          db.ref("users/" + user).set({ password: pass }).then(() => {
+            show("Account Created!", "green");
+            setTimeout(() => window.location.href = "index.html", 800);
+          });
+        }
+      });
+    }
+
+    function show(text, color) {
+      msg.textContent = text;
+      msg.style.color = color;
+    }
+  </script>
+</body>
+</html>

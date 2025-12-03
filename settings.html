@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>⚙️ Account Settings</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding-top:40px;
+  background-color: #d0e6f7;
+}
+h2{
+  font-size:26px;
+  font-weight:bold;
+  color:#333;
+  align-self:flex-start;
+  margin-left:20px;
+  margin-bottom:20px;
+}
+
+#accountBoarder{
+  border:2px solid #333;
+  border-radius:12px;
+  padding:20px;
+  width:90%;
+  max-width:450px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
+  background:
+    linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)),
+    url("setting.jpg");
+  background-size:115%;
+  background-repeat:no-repeat;
+  background-position:center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2), 0 0 15px rgba(0,150,255,0.2);
+}
+
+#profileLabel {
+  font-size:28px;
+  font-weight:bold;
+  color:#333;
+  margin-bottom:30px;
+}
+
+.field{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  width:100%;
+  margin:12px 0;
+}
+
+label{
+  width:120px;
+  font-weight:bold;
+  color:#333;
+}
+
+input{
+  flex:1;
+  padding:10px;
+  border:1px solid #999;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:bold;
+  background:#fff;
+  color:#000;
+}
+
+.editBtn{
+  background:none;
+  border:none;
+  font-size:20px;
+  cursor:pointer;
+}
+
+button{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  color:#fff;
+  cursor:pointer;
+  width:100%;
+  margin-top:10px;
+  font-size:16px;
+}
+
+#save{ background:#4CAF50; }
+
+.actions{
+  display:flex;
+  justify-content:space-between;
+  width:100%;
+  margin-top:15px;
+}
+
+#back{ background:#2196F3; width:48%; }
+#logout{ background:#e74c3c; width:48%; }
+
+#msg{
+  margin-top:10px;
+  font-weight:bold;
+  color:#333;
+}
+
+/* GAME BUTTON */
+.dropdown {
+  position: fixed;
+  bottom: 20px;
+  text-align: center;
+}
+
+#gamesDropdownBtn {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+#gamesDropdownBtn::after {
+  content: "▼";
+  color: red;
+  font-size: 18px;
+  margin-top: 4px;
+}
+
+#gamesDropdown {
+  display: none;
+  position: absolute;
+  bottom: 140px;
+  background-color:white;
+  border-radius: 12px;
+  min-width: 160px;
+  flex-direction: column;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  padding: 10px 0;
+}
+
+#gamesDropdown a {
+  color:black;
+  padding: 10px 16px;
+  text-decoration: none;
+  display: block;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+}
+
+#gamesDropdown a:hover {
+  background-color: #f0f0f0;
+  color: black;
+  border-radius: 8px;
+}
+</style>
+</head>
+<body>
+
+<h2>⚙️ Account Settings</h2>
+
+<div id="accountBoarder">
+  <div id="profileLabel">👤 Hello User</div>
+
+  <div class="field">      
+    <label>Username:</label>      
+    <input type="text" id="username" disabled>      
+    <button id="editUser" class="editBtn">✏️</button>      
+  </div>
+
+  <div class="field">      
+    <label>Password:</label>      
+    <input type="password" id="password" disabled>      
+    <button id="editPass" class="editBtn">✏️</button>      
+  </div>
+
+  <button id="save">✅ Save</button>
+
+  <div class="actions">      
+    <button id="back">🔙 Back</button>      
+    <button id="logout">🚪 Logout</button>    
+  </div>
+
+  <div id="msg"></div>
+</div>
+
+<div class="dropdown">      
+  <button id="gamesDropdownBtn">🎮 Play Games</button>      
+  <div id="gamesDropdown">      
+    <a href="bubble.html">🎈 Bubble Pop</a>      
+    <a href="match.html">🃏 Memory Match</a>      
+    <a href="Relaxation.html">🧘 Relaxation</a>      
+  </div>      
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getDatabase, ref, get, set, update, remove } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBGLsOfLuB4qrKdjHZ5XhQ0svEBOjhuYr4",
+  authDomain: "mental-d59ad.firebaseapp.com",
+  databaseURL: "https://mental-d59ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mental-d59ad",
+  storageBucket: "mental-d59ad.appspot.com",
+  messagingSenderId: "1028228267123",
+  appId: "1:1028228267123:web:29163424031bf3d646be06"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+const profileLabel = document.getElementById("profileLabel");
+const msg = document.getElementById("msg");
+
+let currentUser = localStorage.getItem("currentUser");
+if(!currentUser) window.location.href = "Login.html";
+
+const currentRef = ref(db, "users/" + currentUser);
+
+get(currentRef).then(snapshot => {
+  if(snapshot.exists()){
+    const data = snapshot.val();
+    username.value = currentUser;
+    password.value = data.password || "";
+    profileLabel.textContent = "👤 Hello " + currentUser;
+  }
+});
+
+document.getElementById("editUser").onclick = () => { username.disabled = false; username.focus(); };
+document.getElementById("editPass").onclick = () => { password.disabled = false; password.focus(); };
+
+document.getElementById("save").onclick = async () => {
+  const newUsername = username.value.trim();
+  const newPassword = password.value.trim();
+  if(!newPassword){ msg.textContent="Password cannot be empty!"; return; }
+
+  if(newUsername === currentUser){
+    await update(currentRef, { password: newPassword });
+    msg.textContent="Password updated!";
+  } else {
+    const newRef = ref(db, "users/" + newUsername);
+    const exists = await get(newRef);
+    if(exists.exists()){ msg.textContent="Username already exists!"; return; }
+
+    // GET old user data
+    const oldDataSnap = await get(currentRef);
+    const oldData = oldDataSnap.exists() ? oldDataSnap.val() : {};
+
+    // GET old high scores
+    const bubbleSnap = await get(ref(db,"Game/Bubble/"+currentUser));
+    const matchSnap = await get(ref(db,"Game/Match/"+currentUser));
+
+    const bubbleScore = bubbleSnap.exists() ? bubbleSnap.val().highscore : 0;
+    const matchScore = matchSnap.exists() ? matchSnap.val().highscore : 0;
+
+    // CREATE new user
+    await set(newRef, {...oldData, password: newPassword});
+
+    if(bubbleScore) await set(ref(db,"Game/Bubble/"+newUsername),{highscore:bubbleScore});
+    if(matchScore) await set(ref(db,"Game/Match/"+newUsername),{highscore:matchScore});
+
+    // DELETE old user
+    await remove(currentRef);
+    await remove(ref(db,"Game/Bubble/"+currentUser));
+    await remove(ref(db,"Game/Match/"+currentUser));
+
+    currentUser = newUsername;
+    localStorage.setItem("currentUser", currentUser);
+    profileLabel.textContent = "👤 Hello " + currentUser;
+    msg.textContent = "Username & highscores updated!";
+  }
+
+  username.disabled = true;
+  password.disabled = true;
+};
+
+document.getElementById("back").onclick = () => window.location.href="index.html";
+document.getElementById("logout").onclick = () => {
+  localStorage.removeItem("currentUser");
+  window.location.href="Login.html";
+};
+
+// Games dropdown
+const dropdownBtn = document.getElementById('gamesDropdownBtn');
+const dropdownContent = document.getElementById('gamesDropdown');
+dropdownBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  dropdownContent.style.display = dropdownContent.style.display === 'flex' ? 'none' : 'flex';
+});
+document.addEventListener('click', ()=>{ dropdownContent.style.display='none'; });
+
+</script>
+</body>
+</html>

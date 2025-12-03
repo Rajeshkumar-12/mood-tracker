@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindPress - Weekly Analytics</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f8ff;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+.container {
+  width: 90%;
+  max-width: 500px;
+}
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+.week-card {
+  padding: 20px;
+  margin: 15px 0;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  background: #fff;
+}
+.week-range {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+.avg-mood {
+  font-size: 22px;
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+}
+.day-entry {
+  width: 100%;
+  text-align: left;
+  padding: 10px 8px;
+  border-radius: 8px;
+  margin: 4px 0;
+  font-size: 16px;
+  color: #fff;
+  font-weight: bold;
+}
+#backBtn {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #e74c3c;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+#backBtn:hover {
+  background: #c0392b;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>📊 Weekly Mood Analytics</h1>
+<div class="week-card this-week">
+  <div class="week-range" id="thisWeekRange"></div>
+  <div class="avg-mood" id="thisWeekAvgMood">Loading...</div>
+  <div id="thisWeekMood"></div>
+</div>
+<button id="backBtn">⬅ Back to Mood Tracker</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBGLsOfLuB4qrKdjHZ5XhQ0svEBOjhuYr4",
+  authDomain: "mental-d59ad.firebaseapp.com",
+  databaseURL: "https://mental-d59ad-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mental-d59ad",
+  storageBucket: "mental-d59ad.appspot.com",
+  messagingSenderId: "1028228267123",
+  appId: "1:1028228267123:web:29163424031bf3d646be06",
+  measurementId: "G-BFENJJNX2Y"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const thisWeekRangeEl = document.getElementById('thisWeekRange');
+const thisWeekMoodEl = document.getElementById('thisWeekMood');
+const thisWeekAvgMoodEl = document.getElementById('thisWeekAvgMood');
+const backBtn = document.getElementById('backBtn');
+
+backBtn.addEventListener('click', ()=> window.location.href="index.html");
+
+const currentUser = localStorage.getItem('currentUser');
+if(!currentUser){ alert("Please login!"); window.location.href="Login.html"; }
+
+const userEntriesRef = ref(db, `users/${currentUser}/entries`);
+
+const moodMap = {
+  Happy: { bg: "#1e8449" },
+  Good: { bg: "#58d68d" },
+  Neutral: { bg: "#f4d03f", color:"#000" },
+  Sad: { bg: "#3498db" },
+  VerySad: { bg: "#2e4053" },
+  Angry: { bg: "#c0392b" }
+};
+const avgMoodColor = "#8e44ad";
+
+function formatDate(d){
+  return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+}
+
+function getWeekDates(today){
+  const day = today.getDay();
+  const diffToMonday = day===0 ? 6 : day-1;
+  const monday = new Date(today);
+  monday.setDate(today.getDate()-diffToMonday);
+  const weekDates = [];
+  for(let i=0;i<7;i++){
+    const d = new Date(monday);
+    d.setDate(monday.getDate()+i);
+    weekDates.push(formatDate(d));
+  }
+  return weekDates;
+}
+
+function getWeeklyMood(data, weekDates){
+  let moodSum=0, count=0;
+  const dayEntries = weekDates.map(d => {
+    const moodEntry = Object.values(data).find(e => e.date === d);
+    const mood = moodEntry ? moodEntry.mood : "No entry";
+    if(mood !== "No entry"){
+      count++;
+      moodSum += Object.keys(moodMap).indexOf(mood)+1;
+    }
+    return {date:d, mood};
+  });
+  const avgMood = count ? Object.keys(moodMap)[Math.round(moodSum/count)-1] : "No entries";
+  return {dayEntries, avgMood};
+}
+
+onValue(userEntriesRef, snapshot=>{
+  const data = snapshot.val() || {};
+  const weekDates = getWeekDates(new Date());
+  thisWeekRangeEl.textContent = `This Week: ${weekDates[0]} - ${weekDates[6]}`;
+
+  const {dayEntries, avgMood} = getWeeklyMood(data, weekDates);
+
+  // Average mood box
+  thisWeekAvgMoodEl.textContent = `Average Mood: ${avgMood}`;
+  thisWeekAvgMoodEl.style.background = avgMoodColor;
+  thisWeekAvgMoodEl.style.color = "#fff";
+  thisWeekAvgMoodEl.style.borderRadius = "10px";
+  thisWeekAvgMoodEl.style.padding = "10px";
+  thisWeekAvgMoodEl.style.fontWeight = "bold";
+
+  // Individual day moods
+  thisWeekMoodEl.innerHTML = dayEntries.map(e => {
+    if(e.mood === "No entry") 
+      return `<div class='day-entry' style="background:#7f8c8d">${e.date} → ${e.mood}</div>`;
+    const moodInfo = moodMap[e.mood];
+    const textColor = moodInfo.color || "#fff";
+    return `<div class='day-entry' style="background:${moodInfo.bg}; color:${textColor}">${e.date} → ${e.mood}</div>`;
+  }).join('');
+});
+</script>
+</body>
+</html>
