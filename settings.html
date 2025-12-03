@@ -4,17 +4,24 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>⚙️ Account Settings</title>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
+
 body{
   font-family: Arial, Helvetica, sans-serif;
+  background-color: #d0e6f7;
   min-height:100vh;
   display:flex;
   flex-direction:column;
   align-items:center;
   padding-top:40px;
-  background-color: #d0e6f7;
+
+  /* FIXED PAGE WIDTH */
+  max-width:420px;
+  margin:auto;
 }
+
 h2{
   font-size:26px;
   font-weight:bold;
@@ -24,37 +31,45 @@ h2{
   margin-bottom:20px;
 }
 
+/* FIXED CARD SIZE */
 #accountBoarder{
+  width:380px;
   border:2px solid #333;
   border-radius:12px;
   padding:20px;
-  width:90%;
-  max-width:450px;
+
   display:flex;
   flex-direction:column;
   align-items:center;
   position:relative;
+
   background:
-    linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)),
+    linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72)),
     url("setting.jpg");
-  background-size:115%;
+
+  /* FIXED BACKGROUND IMAGE */
+  background-size:380px 450px;
   background-repeat:no-repeat;
   background-position:center;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2), 0 0 15px rgba(0,150,255,0.2);
+
+  box-shadow:0 8px 20px rgba(0,0,0,0.2),
+             0 0 15px rgba(0,150,255,0.2);
 }
 
-#profileLabel {
+/* FIXED HEADING */
+#profileLabel{
   font-size:28px;
   font-weight:bold;
   color:#333;
   margin-bottom:30px;
 }
 
+/* FIXED FIELDS */
 .field{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  width:100%;
+  width:340px; /* FIXED SIZE */
   margin:12px 0;
 }
 
@@ -64,8 +79,9 @@ label{
   color:#333;
 }
 
+/* FIXED INPUT */
 input{
-  flex:1;
+  width:180px;
   padding:10px;
   border:1px solid #999;
   border-radius:8px;
@@ -89,9 +105,10 @@ button{
   font-weight:bold;
   color:#fff;
   cursor:pointer;
-  width:100%;
-  margin-top:10px;
   font-size:16px;
+  width:100%;
+  max-width:340px;
+  margin-top:10px;
 }
 
 #save{ background:#4CAF50; }
@@ -99,7 +116,7 @@ button{
 .actions{
   display:flex;
   justify-content:space-between;
-  width:100%;
+  width:340px;
   margin-top:15px;
 }
 
@@ -113,64 +130,63 @@ button{
 }
 
 /* GAME BUTTON */
-.dropdown {
-  position: fixed;
-  bottom: 20px;
-  text-align: center;
+.dropdown{
+  position:fixed;
+  bottom:20px;
+  text-align:center;
 }
 
-#gamesDropdownBtn {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background-color: #ff9800;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  position: relative;
+#gamesDropdownBtn{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background-color:#ff9800;
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  box-shadow:0 4px 8px rgba(0,0,0,0.2);
 }
 
-#gamesDropdownBtn::after {
-  content: "▼";
-  color: red;
-  font-size: 18px;
-  margin-top: 4px;
+#gamesDropdownBtn::after{
+  content:"▼";
+  color:red;
+  font-size:18px;
+  margin-top:4px;
 }
 
-#gamesDropdown {
-  display: none;
-  position: absolute;
-  bottom: 140px;
+#gamesDropdown{
+  display:none;
+  position:absolute;
+  bottom:140px;
   background-color:white;
-  border-radius: 12px;
-  min-width: 160px;
-  flex-direction: column;
-  z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  padding: 10px 0;
+  border-radius:12px;
+  min-width:160px;
+  flex-direction:column;
+  z-index:1000;
+  box-shadow:0 4px 8px rgba(0,0,0,0.2);
+  padding:10px 0;
 }
 
-#gamesDropdown a {
+#gamesDropdown a{
   color:black;
-  padding: 10px 16px;
-  text-decoration: none;
-  display: block;
-  font-weight: bold;
-  font-size: 16px;
-  text-align: center;
+  padding:10px 16px;
+  text-decoration:none;
+  display:block;
+  font-weight:bold;
+  font-size:16px;
+  text-align:center;
 }
 
-#gamesDropdown a:hover {
-  background-color: #f0f0f0;
-  color: black;
-  border-radius: 8px;
+#gamesDropdown a:hover{
+  background-color:#f0f0f0;
+  color:black;
+  border-radius:8px;
 }
 </style>
 </head>
@@ -248,8 +264,15 @@ get(currentRef).then(snapshot => {
   }
 });
 
-document.getElementById("editUser").onclick = () => { username.disabled = false; username.focus(); };
-document.getElementById("editPass").onclick = () => { password.disabled = false; password.focus(); };
+document.getElementById("editUser").onclick = () => { 
+  username.disabled = false; 
+  username.focus(); 
+};
+
+document.getElementById("editPass").onclick = () => { 
+  password.disabled = false; 
+  password.focus(); 
+};
 
 document.getElementById("save").onclick = async () => {
   const newUsername = username.value.trim();
@@ -264,24 +287,20 @@ document.getElementById("save").onclick = async () => {
     const exists = await get(newRef);
     if(exists.exists()){ msg.textContent="Username already exists!"; return; }
 
-    // GET old user data
     const oldDataSnap = await get(currentRef);
     const oldData = oldDataSnap.exists() ? oldDataSnap.val() : {};
 
-    // GET old high scores
     const bubbleSnap = await get(ref(db,"Game/Bubble/"+currentUser));
     const matchSnap = await get(ref(db,"Game/Match/"+currentUser));
 
     const bubbleScore = bubbleSnap.exists() ? bubbleSnap.val().highscore : 0;
     const matchScore = matchSnap.exists() ? matchSnap.val().highscore : 0;
 
-    // CREATE new user
     await set(newRef, {...oldData, password: newPassword});
 
     if(bubbleScore) await set(ref(db,"Game/Bubble/"+newUsername),{highscore:bubbleScore});
     if(matchScore) await set(ref(db,"Game/Match/"+newUsername),{highscore:matchScore});
 
-    // DELETE old user
     await remove(currentRef);
     await remove(ref(db,"Game/Bubble/"+currentUser));
     await remove(ref(db,"Game/Match/"+currentUser));
@@ -297,20 +316,25 @@ document.getElementById("save").onclick = async () => {
 };
 
 document.getElementById("back").onclick = () => window.location.href="index.html";
+
 document.getElementById("logout").onclick = () => {
   localStorage.removeItem("currentUser");
   window.location.href="Login.html";
 };
 
-// Games dropdown
 const dropdownBtn = document.getElementById('gamesDropdownBtn');
 const dropdownContent = document.getElementById('gamesDropdown');
+
 dropdownBtn.addEventListener('click', e=>{
   e.stopPropagation();
-  dropdownContent.style.display = dropdownContent.style.display === 'flex' ? 'none' : 'flex';
+  dropdownContent.style.display = 
+    dropdownContent.style.display === 'flex' ? 'none' : 'flex';
 });
-document.addEventListener('click', ()=>{ dropdownContent.style.display='none'; });
 
+document.addEventListener('click', ()=>{
+  dropdownContent.style.display='none';
+});
 </script>
+
 </body>
 </html>
