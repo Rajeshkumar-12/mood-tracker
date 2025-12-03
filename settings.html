@@ -16,13 +16,10 @@ body{
   align-items:center;
   padding-top:40px;
   background-color: #d0e6f7;
-
-  /* Lock body width so UI never stretches */
-  max-width: 420px;
-  margin: auto;
+  max-width:420px;
+  margin:auto;
 }
 
-/* Heading */
 h2{
   font-size:26px;
   font-weight:bold;
@@ -32,9 +29,8 @@ h2{
   margin-bottom:20px;
 }
 
-/* FIXED DESIGN BOX */
 #accountBoarder{
-  width: 380px;      /* FIXED WIDTH */
+  width:380px;
   border:2px solid #333;
   border-radius:12px;
   padding:20px;
@@ -44,25 +40,24 @@ h2{
   background:
     linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)),
     url("setting.jpg");
-  background-size: 380px 450px;   /* FIXED BACKGROUND SIZE */
+  background-size:380px 450px;
   background-repeat:no-repeat;
   background-position:center;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2), 0 0 15px rgba(0,150,255,0.2);
+  box-shadow:0 8px 20px rgba(0,0,0,0.2);
 }
 
-#profileLabel {
+#profileLabel{
   font-size:28px;
   font-weight:bold;
   color:#333;
   margin-bottom:30px;
 }
 
-/* FIXED FIELD WIDTH */
 .field{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  width: 340px;      /* FIXED WIDTH */
+  width:340px;
   margin:12px 0;
 }
 
@@ -72,9 +67,8 @@ label{
   color:#333;
 }
 
-/* FIXED INPUT WIDTH */
 input{
-  width: 180px;      /* FIXED SIZE */
+  width:180px;
   padding:10px;
   border:1px solid #999;
   border-radius:8px;
@@ -91,7 +85,6 @@ input{
   cursor:pointer;
 }
 
-/* Buttons */
 button{
   padding:12px;
   border:none;
@@ -122,65 +115,62 @@ button{
   color:#333;
 }
 
-/* GAME BUTTON FIXED */
-.dropdown {
-  position: fixed;
-  bottom: 20px;
-  text-align: center;
+.dropdown{
+  position:fixed;
+  bottom:20px;
+  text-align:center;
 }
 
-#gamesDropdownBtn {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background-color: #ff9800;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  position: relative;
+#gamesDropdownBtn{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background-color:#ff9800;
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  box-shadow:0 4px 8px rgba(0,0,0,0.2);
 }
 
-#gamesDropdownBtn::after {
-  content: "▼";
-  color: red;
-  font-size: 18px;
-  margin-top: 4px;
+#gamesDropdownBtn::after{
+  content:"▼";
+  color:red;
+  font-size:18px;
+  margin-top:4px;
 }
 
-#gamesDropdown {
-  display: none;
-  position: absolute;
-  bottom: 140px;
-  background-color:white;
-  border-radius: 12px;
-  min-width: 160px;
-  flex-direction: column;
-  z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  padding: 10px 0;
+#gamesDropdown{
+  display:none;
+  position:absolute;
+  bottom:140px;
+  background:white;
+  border-radius:12px;
+  min-width:160px;
+  flex-direction:column;
+  z-index:1000;
+  box-shadow:0 4px 8px rgba(0,0,0,0.2);
+  padding:10px 0;
 }
 
-#gamesDropdown a {
+#gamesDropdown a{
   color:black;
-  padding: 10px 16px;
-  text-decoration: none;
-  display: block;
-  font-weight: bold;
-  font-size: 16px;
-  text-align: center;
+  padding:10px 16px;
+  text-decoration:none;
+  display:block;
+  font-weight:bold;
+  font-size:16px;
+  text-align:center;
 }
 
-#gamesDropdown a:hover {
-  background-color: #f0f0f0;
-  color: black;
-  border-radius: 8px;
+#gamesDropdown a:hover{
+  background:#f0f0f0;
+  border-radius:8px;
 }
 </style>
 </head>
@@ -192,35 +182,35 @@ button{
 <div id="accountBoarder">
   <div id="profileLabel">👤 Hello User</div>
 
-  <div class="field">      
-    <label>Username:</label>      
-    <input type="text" id="username" disabled>      
-    <button id="editUser" class="editBtn">✏️</button>      
+  <div class="field">
+    <label>Username:</label>
+    <input type="text" id="username" disabled>
+    <button id="editUser" class="editBtn">✏️</button>
   </div>
 
-  <div class="field">      
-    <label>Password:</label>      
-    <input type="password" id="password" disabled>      
-    <button id="editPass" class="editBtn">✏️</button>      
+  <div class="field">
+    <label>Password:</label>
+    <input type="password" id="password" disabled>
+    <button id="editPass" class="editBtn">✏️</button>
   </div>
 
   <button id="save">✅ Save</button>
 
-  <div class="actions">      
-    <button id="back">🔙 Back</button>      
-    <button id="logout">🚪 Logout</button>    
+  <div class="actions">
+    <button id="back">🔙 Back</button>
+    <button id="logout">🚪 Logout</button>
   </div>
 
   <div id="msg"></div>
 </div>
 
-<div class="dropdown">      
-  <button id="gamesDropdownBtn">🎮 Play Games</button>      
-  <div id="gamesDropdown">      
-    <a href="bubble.html">🎈 Bubble Pop</a>      
-    <a href="match.html">🃏 Memory Match</a>      
-    <a href="Relaxation.html">🧘 Relaxation</a>      
-  </div>      
+<div class="dropdown">
+  <button id="gamesDropdownBtn">🎮 Play Games</button>
+  <div id="gamesDropdown">
+    <a href="bubble.html">🎈 Bubble Pop</a>
+    <a href="match.html">🃏 Memory Match</a>
+    <a href="Relaxation.html">🧘 Relaxation</a>
+  </div>
 </div>
 
 <script type="module">
@@ -247,12 +237,12 @@ const profileLabel = document.getElementById("profileLabel");
 const msg = document.getElementById("msg");
 
 let currentUser = localStorage.getItem("currentUser");
-if(!currentUser) window.location.href = "Login.html";
+if (!currentUser) window.location.href = "Login.html";
 
 const currentRef = ref(db, "users/" + currentUser);
 
 get(currentRef).then(snapshot => {
-  if(snapshot.exists()){
+  if (snapshot.exists()) {
     const data = snapshot.val();
     username.value = currentUser;
     password.value = data.password || "";
@@ -260,84 +250,101 @@ get(currentRef).then(snapshot => {
   }
 });
 
-document.getElementById("editUser").onclick = () => { 
-  username.disabled = false; 
-  username.focus(); 
+document.getElementById("editUser").onclick = () => {
+  username.disabled = false;
+  username.focus();
 };
 
-document.getElementById("editPass").onclick = () => { 
-  password.disabled = false; 
-  password.focus(); 
+document.getElementById("editPass").onclick = () => {
+  password.disabled = false;
+  password.focus();
 };
 
 document.getElementById("save").onclick = async () => {
+
   const newUsername = username.value.trim();
   const newPassword = password.value.trim();
-  if(!newPassword){ 
-    msg.textContent="Password cannot be empty!"; 
-    return; 
+
+  if (!newPassword) {
+    msg.textContent = "Password cannot be empty!";
+    return;
   }
 
-  if(newUsername === currentUser){
+  if (newUsername === currentUser) {
     await update(currentRef, { password: newPassword });
-    msg.textContent="Password updated!";
+    msg.textContent = "Password updated!";
   } else {
+
     const newRef = ref(db, "users/" + newUsername);
     const exists = await get(newRef);
-    if(exists.exists()){ 
-      msg.textContent="Username already exists!"; 
-      return; 
+
+    if (exists.exists()) {
+      msg.textContent = "Username already exists!";
+      return;
     }
 
     const oldDataSnap = await get(currentRef);
     const oldData = oldDataSnap.exists() ? oldDataSnap.val() : {};
 
-    const bubbleSnap = await get(ref(db,"Game/Bubble/"+currentUser));
-    const matchSnap = await get(ref(db,"Game/Match/"+currentUser));
-
+    // Get bubble score
+    const bubbleSnap = await get(ref(db, "Game/Bubble/" + currentUser));
     const bubbleScore = bubbleSnap.exists() ? bubbleSnap.val().highscore : 0;
-    const matchScore = matchSnap.exists() ? matchSnap.val().highscore : 0;
 
-    await set(newRef, {...oldData, password: newPassword});
+    // Get match (easy/medium/hard)
+    const matchSnap = await get(ref(db, "Game/Match/" + currentUser));
+    let matchData = matchSnap.exists() ? matchSnap.val() : {
+      easy: 0,
+      medium: 0,
+      hard: 0
+    };
 
-    if(bubbleScore) 
-      await set(ref(db,"Game/Bubble/"+newUsername),{highscore:bubbleScore});
-    if(matchScore) 
-      await set(ref(db,"Game/Match/"+newUsername),{highscore:matchScore});
+    await set(newRef, { ...oldData, password: newPassword });
 
+    // Move bubble score
+    await set(ref(db, "Game/Bubble/" + newUsername), { highscore: bubbleScore });
+
+    // Move match ALL levels
+    await set(ref(db, "Game/Match/" + newUsername), {
+      easy: matchData.easy || 0,
+      medium: matchData.medium || 0,
+      hard: matchData.hard || 0
+    });
+
+    // Delete old data
     await remove(currentRef);
-    await remove(ref(db,"Game/Bubble/"+currentUser));
-    await remove(ref(db,"Game/Match/"+currentUser));
+    await remove(ref(db, "Game/Bubble/" + currentUser));
+    await remove(ref(db, "Game/Match/" + currentUser));
 
     currentUser = newUsername;
     localStorage.setItem("currentUser", currentUser);
+
     profileLabel.textContent = "👤 Hello " + currentUser;
-    msg.textContent = "Username & highscores updated!";
+    msg.textContent = "Username updated!";
   }
 
   username.disabled = true;
   password.disabled = true;
 };
 
-document.getElementById("back").onclick = () => 
-  window.location.href="index.html";
+document.getElementById("back").onclick = () =>
+  window.location.href = "index.html";
 
 document.getElementById("logout").onclick = () => {
   localStorage.removeItem("currentUser");
-  window.location.href="Login.html";
+  window.location.href = "Login.html";
 };
 
-const dropdownBtn = document.getElementById('gamesDropdownBtn');
-const dropdownContent = document.getElementById('gamesDropdown');
+const dropdownBtn = document.getElementById("gamesDropdownBtn");
+const dropdownContent = document.getElementById("gamesDropdown");
 
-dropdownBtn.addEventListener('click', e=>{
+dropdownBtn.addEventListener("click", e => {
   e.stopPropagation();
-  dropdownContent.style.display = 
-    dropdownContent.style.display === 'flex' ? 'none' : 'flex';
+  dropdownContent.style.display =
+    dropdownContent.style.display === "flex" ? "none" : "flex";
 });
 
-document.addEventListener('click', ()=>{ 
-  dropdownContent.style.display='none'; 
+document.addEventListener("click", () => {
+  dropdownContent.style.display = "none";
 });
 
 </script>
