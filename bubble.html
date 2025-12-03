@@ -1,104 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎈 Bubble Pop</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>⚙️ Account Settings</title>
+
 <style>
-body {
-  font-family: Arial, sans-serif;
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #d0e6f7;
+  min-height:100vh;
   display:flex;
   flex-direction:column;
   align-items:center;
-  margin:0;
-  height:100vh;
-  background:#b2ebf2;
-  overflow:hidden;
+  padding-top:40px;
+
+  /* FIXED PAGE WIDTH */
+  max-width:420px;
+  margin:auto;
 }
 
 h2{
-  margin-top:10px;
+  font-size:26px;
+  font-weight:bold;
+  color:#333;
+  align-self:flex-start;
+  margin-left:20px;
+  margin-bottom:20px;
 }
 
-#gameHeader{
-  width:90%;
+/* FIXED CARD SIZE */
+#accountBoarder{
+  width:380px;
+  border:2px solid #333;
+  border-radius:12px;
+  padding:20px;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
+
+  background:
+    linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72)),
+    url("setting.jpg");
+
+  /* FIXED BACKGROUND IMAGE */
+  background-size:380px 450px;
+  background-repeat:no-repeat;
+  background-position:center;
+
+  box-shadow:0 8px 20px rgba(0,0,0,0.2),
+             0 0 15px rgba(0,150,255,0.2);
+}
+
+/* FIXED HEADING */
+#profileLabel{
+  font-size:28px;
+  font-weight:bold;
+  color:#333;
+  margin-bottom:30px;
+}
+
+/* FIXED FIELDS */
+.field{
   display:flex;
   justify-content:space-between;
-  padding:0 10px;
-  font-size:18px;
-  font-weight:bold;
-  margin-top:10px;
-}
-
-#scoreBoard{
-  margin-top:5px;
-  font-size:18px;
-  font-weight:bold;
-}
-
-#gameArea{
-  position:relative;
-  width:90%;
-  height:65%;
-  border:2px solid #333;
-  background-color: #fff; /* white background inside border */
-  overflow:hidden;
-  margin-top:10px;
-}
-
-/* Overlay background image with transparency */
-#gameArea::before {
-  content: "";
-  position: absolute;
-  top:0; left:0; right:0; bottom:0;
-  background: url('Bubble.jpg') center/contain no-repeat;
-  opacity: 0.2; /* very transparent */
-  pointer-events: none;
-  z-index: 0;
-}
-
-.bubble{
-  position:absolute;
-  border-radius:50%;
-  cursor:pointer;
-  font-size:20px;
-  display:flex;
-  justify-content:center;
   align-items:center;
-  z-index: 1; /* ensure bubbles are above background */
+  width:340px; /* FIXED SIZE */
+  margin:12px 0;
 }
 
-#resetBtn{
-  margin-top:10px;
-  padding:8px 16px;
-  font-size:16px;
-  border:none;
+label{
+  width:120px;
+  font-weight:bold;
+  color:#333;
+}
+
+/* FIXED INPUT */
+input{
+  width:180px;
+  padding:10px;
+  border:1px solid #999;
   border-radius:8px;
-  background:#ff5722;
-  color:white;
+  font-size:16px;
+  font-weight:bold;
+  background:#fff;
+  color:#000;
+}
+
+.editBtn{
+  background:none;
+  border:none;
+  font-size:20px;
   cursor:pointer;
+}
+
+button{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  color:#fff;
+  cursor:pointer;
+  font-size:16px;
+  width:100%;
+  max-width:340px;
+  margin-top:10px;
+}
+
+#save{ background:#4CAF50; }
+
+.actions{
+  display:flex;
+  justify-content:space-between;
+  width:340px;
+  margin-top:15px;
+}
+
+#back{ background:#2196F3; width:48%; }
+#logout{ background:#e74c3c; width:48%; }
+
+#msg{
+  margin-top:10px;
+  font-weight:bold;
+  color:#333;
+}
+
+/* GAME BUTTON */
+.dropdown{
+  position:fixed;
+  bottom:20px;
+  text-align:center;
+}
+
+#gamesDropdownBtn{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background-color:#ff9800;
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  box-shadow:0 4px 8px rgba(0,0,0,0.2);
+}
+
+#gamesDropdownBtn::after{
+  content:"▼";
+  color:red;
+  font-size:18px;
+  margin-top:4px;
+}
+
+#gamesDropdown{
+  display:none;
+  position:absolute;
+  bottom:140px;
+  background-color:white;
+  border-radius:12px;
+  min-width:160px;
+  flex-direction:column;
+  z-index:1000;
+  box-shadow:0 4px 8px rgba(0,0,0,0.2);
+  padding:10px 0;
+}
+
+#gamesDropdown a{
+  color:black;
+  padding:10px 16px;
+  text-decoration:none;
+  display:block;
+  font-weight:bold;
+  font-size:16px;
+  text-align:center;
+}
+
+#gamesDropdown a:hover{
+  background-color:#f0f0f0;
+  color:black;
+  border-radius:8px;
 }
 </style>
 </head>
 <body>
 
-<h2>🎈 Bubble Pop</h2>
-<div id="gameHeader">
-  <div>📈 High Score: <span id="highScore">0</span></div>
-  <div id="livesLabel">Lives: ❤️❤️❤️</div>
-</div>
-<div id="scoreBoard">Score: 0</div>
-<div id="gameArea"></div>
-<button id="resetBtn">🔄 Reset Game</button>
+<h2>⚙️ Account Settings</h2>
 
-<audio id="popSound" src="pop.mp3" preload="auto"></audio>
-<audio id="gameOverSound" src="Gameover.mp3" preload="auto"></audio>
+<div id="accountBoarder">
+  <div id="profileLabel">👤 Hello User</div>
+
+  <div class="field">      
+    <label>Username:</label>      
+    <input type="text" id="username" disabled>      
+    <button id="editUser" class="editBtn">✏️</button>      
+  </div>
+
+  <div class="field">      
+    <label>Password:</label>      
+    <input type="password" id="password" disabled>      
+    <button id="editPass" class="editBtn">✏️</button>      
+  </div>
+
+  <button id="save">✅ Save</button>
+
+  <div class="actions">      
+    <button id="back">🔙 Back</button>      
+    <button id="logout">🚪 Logout</button>    
+  </div>
+
+  <div id="msg"></div>
+</div>
+
+<div class="dropdown">      
+  <button id="gamesDropdownBtn">🎮 Play Games</button>      
+  <div id="gamesDropdown">      
+    <a href="bubble.html">🎈 Bubble Pop</a>      
+    <a href="match.html">🃏 Memory Match</a>      
+    <a href="Relaxation.html">🧘 Relaxation</a>      
+  </div>      
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
+import { getDatabase, ref, get, set, update, remove } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-database.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBGLsOfLuB4qrKdjHZ5XhQ0svEBOjhuYr4",
   authDomain: "mental-d59ad.firebaseapp.com",
@@ -108,112 +241,100 @@ const firebaseConfig = {
   messagingSenderId: "1028228267123",
   appId: "1:1028228267123:web:29163424031bf3d646be06"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Current user
-let currentUser = localStorage.getItem("currentUser") || "guest";
-const userRef = ref(db, "Game/Bubble/" + currentUser);
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+const profileLabel = document.getElementById("profileLabel");
+const msg = document.getElementById("msg");
 
-// Load highscore
-let highScore = 0;
-get(userRef).then(snapshot=>{
+let currentUser = localStorage.getItem("currentUser");
+if(!currentUser) window.location.href = "Login.html";
+
+const currentRef = ref(db, "users/" + currentUser);
+
+get(currentRef).then(snapshot => {
   if(snapshot.exists()){
-    highScore = snapshot.val().highscore || 0;
-    document.getElementById("highScore").textContent = highScore;
+    const data = snapshot.val();
+    username.value = currentUser;
+    password.value = data.password || "";
+    profileLabel.textContent = "👤 Hello " + currentUser;
   }
 });
 
-// DOM
-const gameArea = document.getElementById("gameArea");
-const scoreBoard = document.getElementById("scoreBoard");
-const livesLabel = document.getElementById("livesLabel");
-const highScoreEl = document.getElementById("highScore");
-const resetBtn = document.getElementById("resetBtn");
-const popSound = document.getElementById("popSound");
-const gameOverSound = document.getElementById("gameOverSound");
+document.getElementById("editUser").onclick = () => { 
+  username.disabled = false; 
+  username.focus(); 
+};
 
-let score = 0;
-let lives = 3;
-let bubbleCount = 0;
-let intervalSpeed = 2000;
-let gameInterval;
+document.getElementById("editPass").onclick = () => { 
+  password.disabled = false; 
+  password.focus(); 
+};
 
-function createBubble() {
-  const bubble = document.createElement("div");
-  const size = Math.random() * 40 + 30;
-  const isBomb = Math.random() < 0.15; 
-  bubble.classList.add("bubble");
-  bubble.style.width = size + "px";
-  bubble.style.height = size + "px";
-  bubble.style.left = Math.random() * (gameArea.clientWidth - size) + "px";
-  bubble.style.top = -size + "px";
-  bubble.textContent = isBomb ? "💣" : "";
-  bubble.style.backgroundColor = isBomb ? "#ff0000" : `hsl(${Math.random()*360},70%,60%)`;
-  gameArea.appendChild(bubble);
+document.getElementById("save").onclick = async () => {
+  const newUsername = username.value.trim();
+  const newPassword = password.value.trim();
+  if(!newPassword){ msg.textContent="Password cannot be empty!"; return; }
 
-  bubble.addEventListener("click", ()=>{
-    if(isBomb){
-      lives--;
-      updateLives();
-      if(lives<=0) endGame();
-    } else {
-      score++;
-      updateScore();
-    }
-    bubble.remove();
-    popSound.currentTime = 0;
-    popSound.play();
-  });
+  if(newUsername === currentUser){
+    await update(currentRef, { password: newPassword });
+    msg.textContent="Password updated!";
+  } else {
+    const newRef = ref(db, "users/" + newUsername);
+    const exists = await get(newRef);
+    if(exists.exists()){ msg.textContent="Username already exists!"; return; }
 
-  let speed = 3;
-  const moveBubble = setInterval(()=>{
-    if(!bubble.parentElement){ clearInterval(moveBubble); return; }
-    let top = parseFloat(bubble.style.top);
-    top += speed;
-    if(top + size >= gameArea.clientHeight){
-      clearInterval(moveBubble);
-      bubble.remove();
-      if(!isBomb){ lives--; updateLives(); if(lives<=0) endGame(); }
-      return;
-    }
-    bubble.style.top = top + "px";
-  }, 20);
+    const oldDataSnap = await get(currentRef);
+    const oldData = oldDataSnap.exists() ? oldDataSnap.val() : {};
 
-  bubbleCount++;
-  if(bubbleCount % 5 === 0 && intervalSpeed>400){
-    intervalSpeed -= 100;
-    clearInterval(gameInterval);
-    gameInterval = setInterval(createBubble, intervalSpeed);
+    const bubbleSnap = await get(ref(db,"Game/Bubble/"+currentUser));
+    const matchSnap = await get(ref(db,"Game/Match/"+currentUser));
+
+    const bubbleScore = bubbleSnap.exists() ? bubbleSnap.val().highscore : 0;
+    const matchScore = matchSnap.exists() ? matchSnap.val().highscore : 0;
+
+    await set(newRef, {...oldData, password: newPassword});
+
+    if(bubbleScore) await set(ref(db,"Game/Bubble/"+newUsername),{highscore:bubbleScore});
+    if(matchScore) await set(ref(db,"Game/Match/"+newUsername),{highscore:matchScore});
+
+    await remove(currentRef);
+    await remove(ref(db,"Game/Bubble/"+currentUser));
+    await remove(ref(db,"Game/Match/"+currentUser));
+
+    currentUser = newUsername;
+    localStorage.setItem("currentUser", currentUser);
+    profileLabel.textContent = "👤 Hello " + currentUser;
+    msg.textContent = "Username & highscores updated!";
   }
-}
 
-function updateScore(){ scoreBoard.textContent = "Score: " + score; }
-function updateLives(){ livesLabel.textContent = "Lives: " + "❤️".repeat(lives); }
+  username.disabled = true;
+  password.disabled = true;
+};
 
-async function endGame(){
-  clearInterval(gameInterval);
-  gameOverSound.currentTime = 0;
-  gameOverSound.play();
-  alert(`🎮 Game Over! Your score: ${score}`);
-  if(score > highScore){
-    highScore = score;
-    highScoreEl.textContent = highScore;
-    await set(userRef, { highscore: highScore });
-  }
-  setTimeout(startGame, 1000);
-}
+document.getElementById("back").onclick = () => window.location.href="index.html";
 
-function startGame(){
-  score=0; lives=3; bubbleCount=0; intervalSpeed=2000;
-  updateScore();
-  updateLives();
-  gameArea.innerHTML="";
-  gameInterval = setInterval(createBubble, intervalSpeed);
-}
+document.getElementById("logout").onclick = () => {
+  localStorage.removeItem("currentUser");
+  window.location.href="Login.html";
+};
 
-resetBtn.addEventListener("click", startGame);
-startGame();
+const dropdownBtn = document.getElementById('gamesDropdownBtn');
+const dropdownContent = document.getElementById('gamesDropdown');
+
+dropdownBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  dropdownContent.style.display = 
+    dropdownContent.style.display === 'flex' ? 'none' : 'flex';
+});
+
+document.addEventListener('click', ()=>{
+  dropdownContent.style.display='none';
+});
 </script>
+
 </body>
 </html>
